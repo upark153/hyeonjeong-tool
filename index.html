@@ -1,0 +1,1065 @@
+        // 질문 목록 생성<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>노현정을 위한 면접 시뮬레이터</title>
+    
+    <!-- PWA 설정 -->
+    <meta name="theme-color" content="#2a5298">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="현정이 면접도구">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- 아이콘 설정 -->
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
+    
+    <!-- 매니페스트 -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi64W466qE7KCV7J2EIOychO2VnCDrqbTsoKXrj4TqtawiLCJzaG9ydF9uYW1lIjoi7YOE7KCV7J2EIOyhqyIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMWUzYzcyIiwidGhlbWVfY29sb3IiOiIjMmE1Mjk4IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBQUVBQUFBQkNBWUFBQUFmRmNTSkFBQUFEVWxFUVZSNDJtTmtZUGhmRHdBQ2h3R0E2MGU2a2dBQUFBQkpSVTVFcmtKZ2dnPT0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ==">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* PWA 설치 버튼 */
+        .install-prompt {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .install-prompt:active {
+            background: #229954;
+            transform: scale(0.95);
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .timer {
+            text-align: center;
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .menu-btn {
+            flex: 1;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .menu-btn:active {
+            background: #2980b9;
+            transform: scale(0.95);
+        }
+
+        .main-container {
+            padding-top: 120px;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        #canvas-container {
+            width: 95%;
+            height: 400px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .fallback-screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .fallback-screen h2 {
+            font-size: 1.5em;
+            margin: 20px 0 10px 0;
+        }
+
+        .fallback-screen .icon {
+            font-size: 4em;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .speech-bubble {
+            position: fixed;
+            bottom: 80px;
+            left: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 150;
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+
+        .bubble-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .interviewer-name {
+            font-weight: bold;
+            color: #e74c3c;
+            flex: 1;
+        }
+
+        .answer-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .answer-btn:active {
+            background: #e67e22;
+        }
+
+        .question-text {
+            font-size: 1em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .question-info {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .bottom-controls {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            z-index: 200;
+        }
+
+        .control-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 6px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            cursor: pointer;
+            min-height: 50px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+            background: #2980b9;
+        }
+
+        .control-btn.restart {
+            background: #e74c3c;
+        }
+
+        .control-btn.restart:active {
+            background: #c0392b;
+        }
+
+        .control-btn.answer {
+            background: #f39c12;
+        }
+
+        .control-btn.answer:active {
+            background: #e67e22;
+        }
+
+        .start-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .start-btn:active {
+            background: #229954;
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90%;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .modal-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .modal-btn:active {
+            background: #2980b9;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .answer-panel {
+            position: fixed;
+            top: 120px;
+            left: 15px;
+            right: 15px;
+            bottom: 150px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            display: none;
+            z-index: 300;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .answer-panel.show {
+            display: block;
+        }
+
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .answer-content {
+            line-height: 1.6;
+            font-size: 0.9em;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .answer-textarea {
+            width: 100%;
+            min-height: 100px;
+            max-height: 120px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .saved-answers {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .saved-answer-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .saved-answer-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .saved-answer-text {
+            color: #34495e;
+            word-wrap: break-word;
+        }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .save-btn:active {
+            background: #229954;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1em;
+            }
+            
+            .menu-btn {
+                font-size: 0.7em;
+                padding: 8px;
+            }
+            
+            .speech-bubble {
+                font-size: 0.9em;
+                padding: 15px;
+            }
+            
+            .control-btn {
+                font-size: 0.7em;
+                padding: 10px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="install-prompt" id="installBtn" onclick="installApp()">📱 앱 설치</button>
+        <h1>💕 노현정을 위한 전북대학교 사서직 면접 시뮬레이터</h1>
+        <div style="text-align: center;">
+            <div class="timer" id="timer">00:00</div>
+        </div>
+        <div style="font-size: 0.8em; text-align: center; margin-top: 8px; color: #e74c3c; font-weight: bold;">
+            💕 현정아, 면접 준비 화이팅! 당신을 응원합니다 💕<br>
+            📅 2025. 7. 18.(금) 14:00~ | 📍 대학본부 2층 | 💼 신분증 필수
+        </div>
+        <div class="menu-buttons">
+            <button class="menu-btn" onclick="showModal('questions')">📝 질문목록</button>
+            <button class="menu-btn" onclick="showModal('tips')">💡 면접팁</button>
+            <button class="menu-btn" onclick="showModal('info')">📋 채용공고</button>
+            <button class="menu-btn" onclick="showModal('message')">💕 응원메시지</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div id="canvas-container">
+            <div class="fallback-screen">
+                <div class="icon">💕</div>
+                <h2>노현정을 위한 면접실</h2>
+                <p>전북대학교 사서직 면접 환경이 준비되었습니다</p>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                    <p style="margin: 0; font-size: 0.9em;">💕 현정아, 당신이라면 꼭 할 수 있어요!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="speech-bubble" id="speechBubble">
+            <div class="bubble-header">
+                <div class="avatar" id="avatar">👨‍💼</div>
+                <div class="interviewer-name" id="interviewer">면접관 1</div>
+                <button class="answer-btn" onclick="toggleAnswers()">💡 답변</button>
+            </div>
+            <div class="question-text" id="questionText">면접을 시작하려면 하단의 '면접 시작' 버튼을 클릭하세요.</div>
+            <div class="question-info" id="questionInfo">준비중</div>
+        </div>
+
+        <button class="start-btn" id="startBtn" onclick="startInterview()">💕 현정아, 면접 시작해요!</button>
+
+        <div class="bottom-controls hidden" id="controls">
+            <button class="control-btn restart" onclick="location.reload()">🔄 재시작</button>
+            <button class="control-btn" onclick="prevQuestion()">⬅️ 이전</button>
+            <button class="control-btn" onclick="nextQuestion()">➡️ 다음</button>
+            <button class="control-btn" onclick="togglePause()">⏸️ 정지</button>
+            <button class="control-btn answer" onclick="toggleAnswers()">💡 답변</button>
+        </div>
+
+        <!-- 답변 패널 -->
+        <div class="answer-panel" id="answerPanel">
+            <div class="answer-header">
+                <h3 id="answerTitle">💡 모범답변</h3>
+                <button class="close-btn" onclick="hideAnswers()">×</button>
+            </div>
+            <div class="answer-content" id="answerContent">
+                모범답변이 여기에 표시됩니다.
+            </div>
+            <div id="myAnswerSection" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #eee;">
+                <h4>✏️ 내 답변 작성</h4>
+                <textarea class="answer-textarea" id="myAnswerText" placeholder="여기에 답변을 작성하세요..."></textarea>
+                <button class="save-btn" onclick="saveAnswer()">💾 저장</button>
+                
+                <div class="saved-answers" id="savedAnswers">
+                    <h5 style="margin: 0 0 10px 0; color: #2c3e50;">📝 저장된 답변들</h5>
+                    <div id="savedAnswersList">
+                        <p style="color: #7f8c8d; font-style: italic; margin: 0;">아직 저장된 답변이 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 응원 메시지 모달 추가 -->
+    <div class="modal" id="messageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💕 현정아, 당신을 위한 응원 메시지</h3>
+                <button class="close-btn" onclick="hideModal()">&times;</button>
+            </div>
+            <div style="text-align: center; line-height: 1.8;">
+                <p>🌟 <strong>현정아, 당신은 정말 대단해요!</strong></p>
+                <p>📚 지금까지 쌓아온 모든 경험과 노력이<br>분명히 좋은 결과로 이어질 거예요</p>
+                <p>💪 면접장에서도 평소 그대로의 모습으로<br>자신감 있게 답변하세요</p>
+                <p>🎯 전북대학교 사서직, 당신이 꼭 해낼 수 있어요!</p>
+                <p>💕 <strong>언제나 당신을 응원하고 있어요</strong></p>
+                <div style="margin-top: 20px; padding: 15px; background: #ffe6f2; border-radius: 10px;">
+                    <p style="margin: 0; color: #d63384;">❤️ 면접 전날까지 이 도구로 충분히 연습하고,<br>당당하게 면접 보시길 바라요!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="questionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 현정이를 위한 면접 질문 목록</h3>
+                <button class="close-btn" onclick="hideModal()">&times;</button>
+            </div>
+            <div id="questionsList"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="tipsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💡 면접 준비 팁</h3>
+                <button class="close-btn" onclick="hideModal()">&times;</button>
+            </div>
+            <div>
+                <h4>🎯 기본 자세</h4>
+                <ul>
+                    <li>자신감 있는 자세와 밝은 표정 유지</li>
+                    <li>면접관과 적절한 아이컨택</li>
+                    <li>명확하고 또렷한 발음으로 답변</li>
+                </ul>
+                <h4>📚 답변 구성법</h4>
+                <ul>
+                    <li>STAR 기법 활용 (상황-과제-행동-결과)</li>
+                    <li>구체적인 사례와 경험 제시</li>
+                    <li>전북대학교에 대한 이해도 표현</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 사서 9급 채용공고</h3>
+                <button class="close-btn" onclick="hideModal()">&times;</button>
+            </div>
+            <div>
+                <h4>📌 모집인원</h4>
+                <p>• 사서 9급 1명</p>
+                <h4>💼 담당업무</h4>
+                <p>• 대학도서관 자료 관리 및 연구·학습지원 서비스</p>
+                <p>• 도서관 통합운영시스템 관리</p>
+                <p>• 사서 행정일반 등 제반 업무</p>
+                <h4>🎯 면접 평정요소</h4>
+                <p>• 소통·공감 • 헌신·열정 • 창의·혁신 • 윤리·책임</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentQuestion = 0;
+        let isStarted = false;
+        let isPaused = false;
+        let startTime = 0;
+        let timerInterval = null;
+        let userId = '노현정'; // 고정된 사용자 ID
+        let answers = {};
+        let deferredPrompt; // PWA 설치 프롬프트
+
+        // 면접 질문 데이터
+        const questions = [
+            {
+                text: "간단한 자기소개를 부탁드립니다.",
+                category: "인성·공직관",
+                interviewer: "면접관 1",
+                answer: "안녕하십니까. 전북대학교 사서직에 지원한 ○○○입니다. 목포시립도서관에서 4년간 근무하며 도서관 운영 전반에 대한 실무 경험을 쌓았습니다. 특히 이용자 서비스와 자료 관리 업무에서 체계적인 업무 처리 능력을 기를 수 있었습니다."
+            },
+            {
+                text: "전북대학교로 전입하려는 이유는 무엇입니까?",
+                category: "헌신·열정",
+                interviewer: "면접관 1",
+                answer: "첫째, 전북대학교가 추진하는 글로컬대학30 사업에 참여하여 대학의 발전에 기여하고 싶습니다. 둘째, 대학도서관은 연구지원 서비스가 핵심인데, 목포시립도서관에서의 경험을 바탕으로 더 전문적인 학술정보 서비스를 제공하고 싶습니다."
+            },
+            {
+                text: "도서관 이용자와 갈등이 발생했을 때 어떻게 해결하시겠습니까?",
+                category: "소통·공감",
+                interviewer: "면접관 2",
+                answer: "먼저 이용자의 입장에서 상황을 경청하고 공감을 표현합니다. 감정적 대응보다는 냉정하게 문제의 원인을 파악하고, 도서관 규정과 이용자의 요구사항을 조율할 수 있는 합리적 해결방안을 제시합니다."
+            },
+            {
+                text: "전북대학교 중앙도서관의 특색에 대해 아는 것이 있나요?",
+                category: "창의·혁신",
+                interviewer: "면접관 3",
+                answer: "전북대 중앙도서관은 지역 거점국립대학으로서 풍부한 학술자료를 보유하고 있으며, 특히 한국학 관련 특성화 자료가 우수하다고 알고 있습니다. 또한 글로컬대학30 사업과 연계하여 국제화된 학습환경 조성에 힘쓰고 있습니다."
+            },
+            {
+                text: "공무원으로서 가져야 할 윤리의식은 무엇입니까?",
+                category: "윤리·책임",
+                interviewer: "면접관 1",
+                answer: "공무원은 국민 전체의 봉사자로서 공정성과 투명성을 최우선으로 해야 합니다. 개인적 이익보다 공익을 우선시하고, 업무 처리 시 편견 없이 모든 이용자를 평등하게 대해야 합니다."
+            },
+            {
+                text: "마지막으로 하고 싶은 말씀이 있다면?",
+                category: "종합",
+                interviewer: "면접관 1",
+                answer: "4년간의 목포시립도서관 경험을 바탕으로 전북대학교 발전에 기여하고 싶습니다. 글로컬대학30 사업과 함께 성장하며, 이용자 중심의 서비스 마인드로 대학구성원들의 연구와 학습을 적극 지원하겠습니다."
+            }
+        ];
+
+        // Three.js 초기화
+        function initThreeJS() {
+            try {
+                const container = document.getElementById('canvas-container');
+                if (!container) return;
+
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x87CEEB);
+
+                const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+                camera.position.set(0, 6, 12);
+
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.setClearColor(0x87CEEB);
+
+                // 기존 내용 지우고 캔버스 추가
+                container.innerHTML = '';
+                container.appendChild(renderer.domElement);
+
+                // 조명
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+                directionalLight.position.set(0, 15, 5);
+                scene.add(directionalLight);
+
+                // 바닥
+                const floorGeometry = new THREE.PlaneGeometry(25, 20);
+                const floorMaterial = new THREE.MeshLambertMaterial({ color: 0xc0c0c0 });
+                const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+                floor.rotation.x = -Math.PI / 2;
+                scene.add(floor);
+
+                // 뒷벽
+                const wallGeometry = new THREE.PlaneGeometry(25, 12);
+                const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xf5f5dc });
+                const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                wall.position.set(0, 6, -10);
+                scene.add(wall);
+
+                // 테이블
+                const tableGeometry = new THREE.BoxGeometry(6, 0.15, 2.5);
+                const tableMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
+                const table = new THREE.Mesh(tableGeometry, tableMaterial);
+                table.position.set(0, 1.5, 0);
+                scene.add(table);
+
+                // 애니메이션
+                function animate() {
+                    requestAnimationFrame(animate);
+                    renderer.render(scene, camera);
+                }
+                animate();
+
+                // 리사이즈
+                window.addEventListener('resize', () => {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                });
+
+                // 3D 환경 초기화 완료
+            } catch (error) {
+                // 3D 초기화 실패, 대체 화면 사용
+            }
+        }
+
+        // 면접 시작
+        function startInterview() {
+            isStarted = true;
+            startTime = Date.now();
+            currentQuestion = 0;
+            
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+            
+            showQuestion();
+            startTimer();
+        }
+
+        // 질문 표시
+        function showQuestion() {
+            if (currentQuestion < questions.length) {
+                const q = questions[currentQuestion];
+                document.getElementById('questionText').textContent = q.text;
+                document.getElementById('interviewer').textContent = q.interviewer;
+                document.getElementById('questionInfo').textContent = `Q${currentQuestion + 1}/${questions.length} | ${q.category}`;
+                
+                const avatars = ['👨‍💼', '👨‍🏫', '👩‍💼'];
+                document.getElementById('avatar').textContent = avatars[currentQuestion % 3];
+            }
+        }
+
+        // 타이머
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('timer').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // 질문 이동
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                alert('🎉 모든 질문이 완료되었습니다!');
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        // 일시정지
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.querySelector('.control-btn:nth-child(4)');
+            btn.textContent = isPaused ? '▶️ 재생' : '⏸️ 정지';
+        }
+
+        // 답변 패널
+        function toggleAnswers() {
+            const panel = document.getElementById('answerPanel');
+            if (panel.classList.contains('show')) {
+                hideAnswers();
+            } else {
+                showAnswers();
+            }
+        }
+
+        function showAnswers() {
+            if (currentQuestion < questions.length) {
+                const q = questions[currentQuestion];
+                document.getElementById('answerTitle').textContent = '💡 모범답변';
+                document.getElementById('answerContent').textContent = q.answer;
+                document.getElementById('answerPanel').classList.add('show');
+                
+                // 현재 질문의 내 답변 로드 (있다면)
+                const myAnswer = answers[currentQuestion] || '';
+                document.getElementById('myAnswerText').value = myAnswer;
+                
+                // 저장된 답변 목록 업데이트
+                updateSavedAnswersList();
+            }
+        }
+
+        function hideAnswers() {
+            document.getElementById('answerPanel').classList.remove('show');
+        }
+
+        // 답변 저장
+        function saveAnswer() {
+            const textArea = document.getElementById('myAnswerText');
+            if (!textArea) {
+                alert('❌ 답변 입력 영역을 찾을 수 없습니다!');
+                return;
+            }
+            
+            const text = textArea.value.trim();
+            if (!text) {
+                alert('현정아, 답변을 입력해주세요! 💕');
+                return;
+            }
+            
+            // 현재 질문에 답변 저장
+            answers[currentQuestion] = text;
+            
+            // localStorage에 저장
+            try {
+                const savedData = JSON.parse(localStorage.getItem('interview_answers') || '{}');
+                if (!savedData[userId]) savedData[userId] = {};
+                savedData[userId][currentQuestion] = text;
+                localStorage.setItem('interview_answers', JSON.stringify(savedData));
+            } catch (error) {
+                console.log('localStorage 저장 실패, 메모리에만 저장');
+            }
+            
+            // 저장 성공 메시지
+            alert('✅ 현정이의 답변이 저장되었어요! 잘하고 있어요 💕');
+            
+            // 답변 카운트 업데이트
+            updateAnswerCount();
+            
+            // 저장된 답변 목록 업데이트
+            updateSavedAnswersList();
+            
+            // 텍스트 영역 비우기
+            textArea.value = '';
+        }
+
+        // 저장된 답변 목록 업데이트
+        function updateSavedAnswersList() {
+            const listElement = document.getElementById('savedAnswersList');
+            if (!listElement) {
+                return;
+            }
+            
+            const savedAnswers = Object.keys(answers);
+            
+            if (savedAnswers.length === 0) {
+                listElement.innerHTML = '<p style="color: #7f8c8d; font-style: italic; margin: 0;">아직 저장된 답변이 없습니다.</p>';
+                return;
+            }
+            
+            listElement.innerHTML = '';
+            
+            savedAnswers.forEach(questionIndex => {
+                const questionNum = parseInt(questionIndex) + 1;
+                const questionText = questions[questionIndex]?.text || '질문 없음';
+                const answerText = answers[questionIndex];
+                
+                const answerItem = document.createElement('div');
+                answerItem.className = 'saved-answer-item';
+                answerItem.innerHTML = `
+                    <div class="saved-answer-header">Q${questionNum}. ${questionText}</div>
+                    <div class="saved-answer-text">${answerText}</div>
+                `;
+                
+                listElement.appendChild(answerItem);
+            });
+        }
+
+        // 모달 관리
+        function showModal(type) {
+            hideModal();
+            
+            if (type === 'questions') {
+                generateQuestionsList();
+                document.getElementById('questionsModal').style.display = 'flex';
+            } else if (type === 'tips') {
+                document.getElementById('tipsModal').style.display = 'flex';
+            } else if (type === 'info') {
+                document.getElementById('infoModal').style.display = 'flex';
+            } else if (type === 'message') {
+                document.getElementById('messageModal').style.display = 'flex';
+            }
+        }
+
+        function hideModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        // ID 관리 (고정된 사용자를 위해 간소화)
+        function updateAnswerCount() {
+            // ID 표시 관련 코드 제거 (고정 사용자)
+        }
+
+        // PWA 설치 기능
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('앱 설치 완료');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installBtn').style.display = 'none';
+                });
+            }
+        }
+
+        // PWA 이벤트 리스너
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'block';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('installBtn').style.display = 'none';
+            deferredPrompt = null;
+        });
+        function generateQuestionsList() {
+            const list = document.getElementById('questionsList');
+            list.innerHTML = '';
+            
+            questions.forEach((q, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    padding: 12px;
+                    margin: 8px 0;
+                    background: ${index === currentQuestion ? '#e3f2fd' : '#f8f9fa'};
+                    border-radius: 8px;
+                    cursor: pointer;
+                    border: 2px solid ${index === currentQuestion ? '#2196f3' : '#dee2e6'};
+                `;
+                
+                item.innerHTML = `
+                    <div style="font-weight: bold; color: #2196f3; margin-bottom: 4px;">Q${index + 1}</div>
+                    <div style="font-size: 0.9em; margin-bottom: 6px;">${q.text}</div>
+                    <div style="font-size: 0.8em; color: #666;">
+                        ${q.category} | ${q.interviewer}
+                        ${answers[index] ? ' | ✅ 답변완료' : ''}
+                    </div>
+                `;
+                
+                item.onclick = () => {
+                    if (isStarted) {
+                        currentQuestion = index;
+                        showQuestion();
+                        hideModal();
+                    }
+                };
+                
+                list.appendChild(item);
+            });
+        }
+
+        // 초기화
+        window.addEventListener('load', function() {
+            // 3D 환경 초기화 시도
+            setTimeout(() => {
+                initThreeJS();
+            }, 500);
+            
+            // 저장된 답변 자동 로드 (노현정 전용)
+            try {
+                const savedData = localStorage.getItem('interview_answers');
+                if (savedData) {
+                    const allData = JSON.parse(savedData);
+                    if (allData[userId]) {
+                        answers = allData[userId];
+                        updateSavedAnswersList();
+                    }
+                }
+            } catch (error) {
+                console.log('저장된 데이터 로드 실패');
+            }
+            
+            // 모바일 최적화
+            if (window.innerWidth <= 768) {
+                document.body.style.fontSize = '14px';
+            }
+            
+            // PWA 설치 버튼 초기 설정
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('installBtn').style.display = 'none';
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideModal();
+                hideAnswers();
+            }
+        });
+
+        // 모달 배경 클릭으로 닫기
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    hideModal();
+                }
+            });
+        });
+
+        // 터치 디바이스 최적화
+        if ('ontouchstart' in window) {
+            document.body.style.webkitTouchCallout = 'none';
+            document.body.style.webkitUserSelect = 'none';
+        }
+    </script>
+</body>
+</html>
